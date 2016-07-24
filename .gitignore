@@ -1,0 +1,6 @@
+.vs/
+packages/
+DCBot/ffmpeg-20160718-450cf40-win32-static/
+DCBot/bin/Debug/
+DCBot/obj/Debug/
+*.exe
