@@ -1,0 +1,13 @@
+﻿{
+  "command_char": "!",
+  "commands": [
+    {
+      "path": "cena.mp3",
+      "command": "cena"
+    },
+    {
+      "path": "gitgud.mp3",
+      "command": "gitgud"
+    }
+  ]
+}

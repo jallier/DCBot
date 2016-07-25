@@ -7,6 +7,7 @@ using Discord;
 using Discord.Audio;
 using System.Diagnostics;
 using System.Threading;
+using System.IO;
 
 namespace DCBot
 {
@@ -14,6 +15,7 @@ namespace DCBot
     {
         static void Main(string[] args)
         {
+            Initializer config = new Initializer();
             new Program().Start();
         }
 
@@ -40,7 +42,8 @@ namespace DCBot
                     await e.Channel.SendMessage(e.Message.Text);
 
                     _vClient = await _vService.Join(voiceChannel);
-                    SendAudio("cena.mp3");
+                    //SendAudio("cena.mp3");
+                    send("cena.wav");
                     await _vClient.Disconnect();
                 }
             };
@@ -50,6 +53,21 @@ namespace DCBot
                 await _client.Connect("MjA2NTc5ODMxNDg2NDE0ODU5.CnWo_w.oJP53Ua0qBGBPMsLofCvfFaheXw");
             });
 
+        }
+
+        private void send(string path)
+        {
+            int blockSize = 3840; // The size of bytes to read per frame; 1920 for mono
+
+            using (FileStream f = File.Open(path, FileMode.Open))
+            {
+                byte[] buffer = new byte[blockSize];
+                while (f.Read(buffer, 0, buffer.Length) > 0)
+                {
+                    _vClient.Send(buffer, 0, buffer.Length);
+                }
+                _vClient.Wait();
+            }
         }
 
         public void SendAudio(string pathOrUrl)
