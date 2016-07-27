@@ -8,14 +8,15 @@ using Discord.Audio;
 using System.Diagnostics;
 using System.Threading;
 using System.IO;
+using Discord.Commands;
 
 namespace DCBot
 {
     class Program
     {
+        Initializer config;
         static void Main(string[] args)
         {
-            Initializer config = new Initializer();
             new Program().Start();
         }
 
@@ -24,6 +25,7 @@ namespace DCBot
 
         public void Start()
         {
+            config = new Initializer();
             _client = new DiscordClient();
 
             _client.UsingAudio(x => // Opens an AudioConfigBuilder so we can configure our AudioService
@@ -33,18 +35,20 @@ namespace DCBot
 
             var _vService = _client.GetService<AudioService>();
 
+            _client.UsingCommands(x =>
+            {
+                x.PrefixChar = config.CommandChar;
+                x.HelpMode = HelpMode.Public;
+            });
+
+            createCommands();
+
             _client.MessageReceived += async (s, e) =>
             {
-                var voiceChannel = _client.Servers.FirstOrDefault().VoiceChannels.FirstOrDefault();
                 if (!e.Message.IsAuthor)
                 {
                     Console.WriteLine("Message recieved from " + e.User + ": " + e.Message.Text);
                     await e.Channel.SendMessage(e.Message.Text);
-
-                    _vClient = await _vService.Join(voiceChannel);
-                    //SendAudio("cena.mp3");
-                    send("cena.wav");
-                    await _vClient.Disconnect();
                 }
             };
 
@@ -53,6 +57,22 @@ namespace DCBot
                 await _client.Connect("MjA2NTc5ODMxNDg2NDE0ODU5.CnWo_w.oJP53Ua0qBGBPMsLofCvfFaheXw");
             });
 
+        }
+
+        private void createCommands()
+        {
+            foreach (var command in config.commands)
+            {
+                CommandBuilder cb = _client.GetService<CommandService>().CreateCommand(command.Command);
+                if (command.Alias != null) { cb.Alias(command.Alias); }
+                if (command.Description != null) { cb.Description(command.Description); }
+                cb.Do(async e =>
+                {
+                    _vClient = await e.User.VoiceChannel.JoinAudio();
+                    send(command.Path);
+                    await _vClient.Disconnect();
+                });
+            }
         }
 
         private void send(string path)

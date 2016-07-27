@@ -1,13 +1,17 @@
 ﻿{
-  "command_char": "!",
+  "command_char": "$",
   "commands": [
     {
-      "path": "cena.mp3",
-      "command": "cena"
+      "command": "cena",
+      "alias": [ "jc" ],
+      "description": "Doot doodoo dooooooot",
+      "path": "cena.mp3"
     },
     {
-      "path": "gitgud.mp3",
-      "command": "gitgud"
+      "command": "brutal",
+      "alias": [ "bsr", "brutalsavagerekt" ],
+      "description": "Brutal. Savage. Rekt",
+      "path": "bsr.mp3"
     }
   ]
 }

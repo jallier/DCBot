@@ -13,8 +13,8 @@ namespace DCBot
     class Initializer
     {
         public List<Audio> commands { get; } = new List<Audio>();
-        public string CommandChar { get; }
-        private string commandChar;
+        public char CommandChar { get; }
+        private char commandChar;
         public Initializer()
         {
             run();
@@ -63,10 +63,21 @@ namespace DCBot
         {
             string inputJSON = File.ReadAllText("config.json");
             JObject json = JObject.Parse(inputJSON);
-            commandChar = (string)json["command_char"];
+            commandChar = (char)json["command_char"];
             foreach (var command in json["commands"])
             {
-                commands.Add(new Audio((string)command["path"], (string)command["command"]));
+                Audio audio = new Audio((string)command["command"], (string)command["path"]);
+                if (command["alias"] != null)
+                {
+                    List<string> output = new List<string>();
+                    foreach (var item in command["alias"])
+                    {
+                        output.Add((string) item);
+                    }
+                    audio.Alias = output.ToArray();
+                }
+                if (command["description"] != null) { audio.Description = (string) command["description"]; }
+                commands.Add(audio);
             }
         }
     }
