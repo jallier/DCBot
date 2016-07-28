@@ -22,6 +22,8 @@ namespace DCBot
 
         private DiscordClient _client;
         private IAudioClient _vClient;
+        private Queue<Command> audioQueue = new Queue<Command>();
+        private bool audioPlaying = false; //This seems like a dirty hack.
 
         public void Start()
         {
@@ -33,7 +35,7 @@ namespace DCBot
                 x.Mode = AudioMode.Outgoing; // Tells the AudioService that we will only be sending audio
             });
 
-            var _vService = _client.GetService<AudioService>();
+            //var _vService = _client.GetService<AudioService>();
 
             _client.UsingCommands(x =>
             {
@@ -61,16 +63,16 @@ namespace DCBot
 
         private void createCommands()
         {
-            foreach (var command in config.commands)
+            foreach (Audio command in config.commands)
             {
                 CommandBuilder cb = _client.GetService<CommandService>().CreateCommand(command.Command);
                 if (command.Alias != null) { cb.Alias(command.Alias); }
                 if (command.Description != null) { cb.Description(command.Description); }
-                cb.Do(async e =>
+                cb.Do( e =>
                 {
-                    _vClient = await e.User.VoiceChannel.JoinAudio();
-                    send(command.Path);
-                    await _vClient.Disconnect();
+                    addAudioToQueue(command.Path, e.User.VoiceChannel);
+                    if (!audioPlaying) { sendAudioQueue();}
+                    
                 });
             }
         }
@@ -90,33 +92,33 @@ namespace DCBot
             }
         }
 
-        public void SendAudio(string pathOrUrl)
+        private void addAudioToQueue(string path, Channel voiceChannel)
         {
-            var process = Process.Start(new ProcessStartInfo
-            { // FFmpeg requires us to spawn a process and hook into its stdout, so we will create a Process
-                FileName = "ffmpeg",
-                Arguments = $"-i {pathOrUrl} " + // Here we provide a list of arguments to feed into FFmpeg. -i means the location of the file/URL it will read from
-                            "-f s16le -ar 48000 -ac 2 pipe:1", // Next, we tell it to output 16-bit 48000Hz PCM, over 2 channels, to stdout.
-                UseShellExecute = false,
-                RedirectStandardOutput = true // Capture the stdout of the process
-            });
-            Thread.Sleep(1000); // Sleep for a few seconds to FFmpeg can start processing data.
+            audioQueue.Enqueue(new Command(path, voiceChannel));
+        }
 
-            int blockSize = 3840; // The size of bytes to read per frame; 1920 for mono
-            byte[] buffer = new byte[blockSize];
-            int byteCount;
-
-            while (true) // Loop forever, so data will always be read
+        private async void sendAudioQueue()
+        {
+            while(audioQueue.Count > 0)
             {
-                byteCount = process.StandardOutput.BaseStream // Access the underlying MemoryStream from the stdout of FFmpeg
-                        .Read(buffer, 0, blockSize); // Read stdout into the buffer
-
-                if (byteCount == 0) // FFmpeg did not output anything
-                    break; // Break out of the while(true) loop, since there was nothing to read.
-
-                _vClient.Send(buffer, 0, byteCount); // Send our data to Discord
+                audioPlaying = true;
+                Command current = audioQueue.Dequeue();
+                try { _vClient = await current.VoiceChannel.JoinAudio(); } catch { }
+                send(current.Path);
             }
-            _vClient.Wait(); // Wait for the Voice Client to finish sending data, as ffMPEG may have already finished buffering out a song, and it is unsafe to return now.
+            await _vClient.Disconnect();
+            audioPlaying = false;
+        }
+    }
+
+    class Command
+    {
+        public string Path { get; }
+        public Channel VoiceChannel { get; }
+        public Command(string path, Channel voiceChannel)
+        {
+            Path = path;
+            VoiceChannel = voiceChannel;
         }
     }
 }
