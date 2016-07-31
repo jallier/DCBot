@@ -14,12 +14,12 @@ namespace DCBot
 {
     class Program
     {
-        Initializer config;
         static void Main(string[] args)
         {
             new Program().Start();
         }
 
+        private Initializer config;
         private DiscordClient _client;
         private IAudioClient _vClient;
         private Queue<Command> audioQueue = new Queue<Command>();
@@ -68,12 +68,15 @@ namespace DCBot
                 CommandBuilder cb = _client.GetService<CommandService>().CreateCommand(command.Command);
                 if (command.Alias != null) { cb.Alias(command.Alias); }
                 if (command.Description != null) { cb.Description(command.Description); }
-                cb.Do( e =>
-                {
-                    addAudioToQueue(command.Path, e.User.VoiceChannel);
-                    if (!audioPlaying) { sendAudioQueue();}
-                    
-                });
+                cb.Do(e =>
+               {
+                   if (e.User.VoiceChannel != null)
+                   {
+                       addAudioToQueue(command.Path, e.User.VoiceChannel);
+                       if (!audioPlaying) { sendAudioQueue(); }
+                   }
+
+               });
             }
         }
 
@@ -88,6 +91,7 @@ namespace DCBot
                 {
                     _vClient.Send(buffer, 0, buffer.Length);
                 }
+
                 _vClient.Wait();
             }
         }
@@ -99,7 +103,7 @@ namespace DCBot
 
         private async void sendAudioQueue()
         {
-            while(audioQueue.Count > 0)
+            while (audioQueue.Count > 0)
             {
                 audioPlaying = true;
                 Command current = audioQueue.Dequeue();
