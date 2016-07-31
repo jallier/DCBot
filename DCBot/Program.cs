@@ -56,7 +56,9 @@ namespace DCBot
 
             _client.ExecuteAndWait(async () =>
             {
+                Console.WriteLine("Connecting to Discord...");
                 await _client.Connect("MjA2NTc5ODMxNDg2NDE0ODU5.CnWo_w.oJP53Ua0qBGBPMsLofCvfFaheXw");
+                Console.WriteLine("Connected!");
             });
 
         }
@@ -84,16 +86,20 @@ namespace DCBot
         {
             int blockSize = 3840; // The size of bytes to read per frame; 1920 for mono
 
-            using (FileStream f = File.Open(path, FileMode.Open))
+            try
             {
-                byte[] buffer = new byte[blockSize];
-                while (f.Read(buffer, 0, buffer.Length) > 0)
+                using (FileStream f = File.Open(path, FileMode.Open))
                 {
-                    _vClient.Send(buffer, 0, buffer.Length);
-                }
+                    byte[] buffer = new byte[blockSize];
+                    while (f.Read(buffer, 0, buffer.Length) > 0)
+                    {
+                        _vClient.Send(buffer, 0, buffer.Length);
+                    }
 
-                _vClient.Wait();
+                    _vClient.Wait();
+                }
             }
+            catch (FileNotFoundException e) { Console.WriteLine(string.Format("Could not find file; ensure {0} is correct path", path)); }
         }
 
         private void addAudioToQueue(string path, Channel voiceChannel)

@@ -24,16 +24,26 @@ namespace DCBot
         public void run()
         {
             readConfig();
+            bool convertedWAV = false;
             foreach (var audio in commands)
             {
                 if (!checkForWAV(audio.Path))
                 {
                     convertToWAV(audio.Path);
+                    convertedWAV = true;
                 }
                 else
                 {
                     audio.Path = Path.ChangeExtension(audio.Path, ".wav");
                 }
+            }
+            if (convertedWAV)
+            {
+                Console.WriteLine("Converted files to appropriate format; please rerun DCBot to start. Press enter to continue");
+                Console.ReadLine();
+                Environment.Exit(0);
+                //Kill the program and ask the user to restart it; This fixes a strange bug where using ffmpeg to convert to
+                //WAV would cause static to play when the command is called.
             }
         }
 
@@ -45,7 +55,7 @@ namespace DCBot
             {
                 FileName = "ffmpeg",
                 Arguments = string.Format("-i {0} -ar 48000 {1}.wav", path, file),
-                UseShellExecute = false
+                UseShellExecute = true
             });
         }
 
@@ -67,16 +77,17 @@ namespace DCBot
             foreach (var command in json["commands"])
             {
                 Audio audio = new Audio((string)command["command"], (string)command["path"]);
+                if (!File.Exists(audio.Path)) { continue; }
                 if (command["alias"] != null)
                 {
                     List<string> output = new List<string>();
                     foreach (var item in command["alias"])
                     {
-                        output.Add((string) item);
+                        output.Add((string)item);
                     }
                     audio.Alias = output.ToArray();
                 }
-                if (command["description"] != null) { audio.Description = (string) command["description"]; }
+                if (command["description"] != null) { audio.Description = (string)command["description"]; }
                 commands.Add(audio);
             }
         }

@@ -12,6 +12,11 @@
       "alias": [ "bsr", "brutalsavagerekt" ],
       "description": "Brutal. Savage. Rekt",
       "path": "bsr.mp3"
+    },
+    {
+      "command": "ymad",
+      "description": "Why you heff to be mad?",
+      "path": "ymad.wav"
     }
   ]
 }
