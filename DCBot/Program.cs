@@ -25,6 +25,9 @@ namespace DCBot
         private Queue<Command> audioQueue = new Queue<Command>();
         private bool audioPlaying = false; //This seems like a dirty hack.
 
+        /// <summary>
+        /// Method to start the bot.
+        /// </summary>
         public void Start()
         {
             config = new Initializer();
@@ -63,6 +66,9 @@ namespace DCBot
 
         }
 
+        /// <summary>
+        /// Create the commands from the commands in the config file for Discord.Net
+        /// </summary>
         private void createCommands()
         {
             foreach (Audio command in config.commands)
@@ -82,6 +88,10 @@ namespace DCBot
             }
         }
 
+        /// <summary>
+        /// Send audio to the current _vClient channel
+        /// </summary>
+        /// <param name="path">Path of the .wav file to send</param>
         private void send(string path)
         {
             int blockSize = 3840; // The size of bytes to read per frame; 1920 for mono
@@ -119,16 +129,19 @@ namespace DCBot
             await _vClient.Disconnect();
             audioPlaying = false;
         }
-    }
 
-    class Command
-    {
-        public string Path { get; }
-        public Channel VoiceChannel { get; }
-        public Command(string path, Channel voiceChannel)
+        /// <summary>
+        /// Represents a single command from a user to add to the audio queue.
+        /// </summary>
+        class Command
         {
-            Path = path;
-            VoiceChannel = voiceChannel;
+            public string Path { get; }
+            public Channel VoiceChannel { get; }
+            public Command(string path, Channel voiceChannel)
+            {
+                Path = path;
+                VoiceChannel = voiceChannel;
+            }
         }
     }
 }

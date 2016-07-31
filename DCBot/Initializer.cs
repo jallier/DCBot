@@ -10,8 +10,14 @@ using System.Diagnostics;
 
 namespace DCBot
 {
+    /// <summary>
+    /// Reads the config file and converts the audio files stored to .wav
+    /// </summary>
     class Initializer
     {
+        /// <summary>
+        /// List of commands stored in the config file
+        /// </summary>
         public List<Audio> commands { get; } = new List<Audio>();
         public char CommandChar { get; }
         private char commandChar;
@@ -47,6 +53,10 @@ namespace DCBot
             }
         }
 
+        /// <summary>
+        /// Uses ffmpeg to convert files to .wav for easier reading and playing of audio.
+        /// </summary>
+        /// <param name="path"></param>
         private void convertToWAV(string path)
         {
             Console.WriteLine(path);
@@ -69,6 +79,9 @@ namespace DCBot
             return true;
         }
 
+        /// <summary>
+        /// Read the config file and populate the list with the commands described in the config file.
+        /// </summary>
         private void readConfig()
         {
             string inputJSON = File.ReadAllText("config.json");

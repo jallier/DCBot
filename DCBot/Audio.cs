@@ -6,8 +6,14 @@ using System.Threading.Tasks;
 
 namespace DCBot
 {
+    /// <summary>
+    /// Represents a command as described in the config file
+    /// </summary>
     class Audio
     {
+        /// <summary>
+        /// Command user will type to play soundbite
+        /// </summary>
         public string Command { get; }
         public string Path { get; set; }
         public string[] Alias { get; set; }
