@@ -1,4 +1,5 @@
 ﻿{
+  "token": "Your token goes here",
   "command_char": "$",
   "commands": [
     {

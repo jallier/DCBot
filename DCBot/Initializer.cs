@@ -19,12 +19,11 @@ namespace DCBot
         /// List of commands stored in the config file
         /// </summary>
         public List<Audio> commands { get; } = new List<Audio>();
-        public char CommandChar { get; }
-        private char commandChar;
+        public string TOKEN { get; private set; }
+        public char CommandChar { get; private set; }
         public Initializer()
         {
             run();
-            CommandChar = commandChar;
         }
 
         public void run()
@@ -86,7 +85,8 @@ namespace DCBot
         {
             string inputJSON = File.ReadAllText("config.json");
             JObject json = JObject.Parse(inputJSON);
-            commandChar = (char)json["command_char"];
+            TOKEN = (string)json["token"];
+            CommandChar = (char)json["command_char"];
             foreach (var command in json["commands"])
             {
                 Audio audio = new Audio((string)command["command"], (string)command["path"]);

@@ -60,7 +60,13 @@ namespace DCBot
             _client.ExecuteAndWait(async () =>
             {
                 Console.WriteLine("Connecting to Discord...");
-                await _client.Connect("MjA2NTc5ODMxNDg2NDE0ODU5.CnWo_w.oJP53Ua0qBGBPMsLofCvfFaheXw");
+                try { await _client.Connect(config.TOKEN); }
+                catch (Discord.Net.HttpException e)
+                {
+                    Console.WriteLine("Unable to connect to Discord. Have you registered a new bot? Is your token correct? \nPress enter to exit");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
                 Console.WriteLine("Connected!");
             });
 
