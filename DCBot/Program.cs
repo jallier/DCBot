@@ -48,15 +48,6 @@ namespace DCBot
 
             createCommands();
 
-            _client.MessageReceived += async (s, e) =>
-            {
-                if (!e.Message.IsAuthor)
-                {
-                    Console.WriteLine("Message recieved from " + e.User + ": " + e.Message.Text);
-                    await e.Channel.SendMessage(e.Message.Text);
-                }
-            };
-
             _client.ExecuteAndWait(async () =>
             {
                 Console.WriteLine("Connecting to Discord...");
@@ -88,10 +79,17 @@ namespace DCBot
                    {
                        addAudioToQueue(command.Path, e.User.VoiceChannel);
                        if (!audioPlaying) { sendAudioQueue(); }
+                       Console.WriteLine(string.Format("Received command: {1} from: {0}", e.User, command.Command));
                    }
 
                });
             }
+            _client.GetService<CommandService>().CreateCommand("ayy")
+                .Description("Test if the bost is receiving messages")
+                .Do(e =>
+                {
+                    e.Channel.SendMessage("lmao");
+                });
         }
 
         /// <summary>
