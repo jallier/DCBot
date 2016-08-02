@@ -9,7 +9,8 @@ After installing you need to do 2 things before you can run the bot: Register a 
 1. Head over to the [applicatons page](https://discordapp.com/developers/applications/me).
 2. Click "new application". Give it a name, picture and description.
 3. Click "Create Bot User" and click "Yes, Do It!" when the dialog pops up.
-4. Copy down the `token`. This is what is used to login to Red.
+4. Copy down the `token`. This is what is used for the bot to login.
+5. Copy down the `client/application id`. This is used to generate a url to add the bot to your server
 
 Here's a handy gif to explain the process. ![oauth new bot](https://i.imgur.com/Y2ouW7I.gif)
 
@@ -18,6 +19,7 @@ Open config.json with notepad or your text editor of choice. config.json is stru
 
 > {
   "token": "your token goes here",
+  "client_id": "your client id goes here"
   "command_char": "$",
   "commands": [
     {
@@ -29,7 +31,7 @@ Open config.json with notepad or your text editor of choice. config.json is stru
   ]
 }
 
-1. First replace the token field with the token generated when the bot was registered, as in the gif. 
+1. First replace the token and client_id field with the token generated when the bot was registered, as in the gif. 
 2. Then choose a command char. This will be the character you use before any commands. 
 3. Then edit your commands. 
 
