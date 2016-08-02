@@ -1,8 +1,8 @@
 # DCBot
-A simple Discord bot to play audio snippets from text commands, similar to Airhorn bot. 
-To install, download the folder and run DCBot.exe. Ensure that ffmpeg, libsodium.dll and opus.dll are in the same directory. These files are included in folder, or can be found in the res directory.
+A simple Discord bot to play audio snippets from text commands, similar to Airhorn bot.
+To install, download the folder and run DCBot.exe. Ensure that ffmpeg, libsodium.dll and opus.dll are in the same directory. These files are included in folder, or can be found in the res directory (except for ffmpeg which can be found on [its webpage](https://ffmpeg.org/))
 
-After installing you need to do 2 things before you can run the bot: Register a new bot account and edit the config file 
+After installing you need to do 2 things before you can run the bot: Register a new bot account and edit the config file
 
 ### Creating a new bot account
 
@@ -17,7 +17,8 @@ Here's a handy gif to explain the process. ![oauth new bot](https://i.imgur.com/
 ### Edit the config file
 Open config.json with notepad or your text editor of choice. config.json is structured:
 
-> {
+```
+  {
   "token": "your token goes here",
   "client_id": "your client id goes here"
   "command_char": "$",
@@ -30,14 +31,15 @@ Open config.json with notepad or your text editor of choice. config.json is stru
     }
   ]
 }
+```
 
-1. First replace the token and client_id field with the token generated when the bot was registered, as in the gif. 
-2. Then choose a command char. This will be the character you use before any commands. 
-3. Then edit your commands. 
+1. First replace the token and client_id field with the token generated when the bot was registered, as in the gif.
+2. Then choose a command char. This will be the character you use before any commands.
+3. Then edit your commands.
 
 - `"command"` the actual command typed eg $cena. The alias is a string array of aliases you can use instead of the main command
 - `alias` a string array containing alternate commands eg $jc will play the same sound as \$cena. This field can be omitted
-- `description` A description of the command for the help command. This can be omitted. 
+- `description` A description of the command for the help command. This can be omitted.
 - `path` The location of the file. If this is in the same directory this can simply be the filename.
 
 Once the steps are complete, you can run DCBot. It will first attempt to convert the audio files listed in the config file to .wav for easy playing and generate a url which you can follow in a browser to add your bot to your server. DCBot will then exit. When you run it again it will join the server and be ready to go!
