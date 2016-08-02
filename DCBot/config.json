@@ -1,5 +1,6 @@
 ﻿{
   "token": "Your token goes here",
+  "client_id":  "Your client id goes here",
   "command_char": "$",
   "commands": [
     {

@@ -86,6 +86,8 @@ namespace DCBot
             string inputJSON = File.ReadAllText("config.json");
             JObject json = JObject.Parse(inputJSON);
             TOKEN = (string)json["token"];
+            string client_id = (string)json["client_id"];
+            generateAddURL(client_id);
             CommandChar = (char)json["command_char"];
             foreach (var command in json["commands"])
             {
@@ -103,6 +105,13 @@ namespace DCBot
                 if (command["description"] != null) { audio.Description = (string)command["description"]; }
                 commands.Add(audio);
             }
+        }
+
+        private void generateAddURL(string client_id)
+        {
+            string base_string = "https://discordapp.com/oauth2/authorize?scope=bot&permissions=0&client_id=";
+            Console.WriteLine("If you haven't done so, visit this URL to add the bot to your server");
+            Console.WriteLine(base_string + client_id);
         }
     }
 }
