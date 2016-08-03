@@ -64,7 +64,7 @@ namespace DCBot
             {
                 FileName = "ffmpeg",
                 Arguments = string.Format("-i {0} -ar 48000 {1}.wav", path, file),
-                UseShellExecute = true
+                UseShellExecute = false
             });
         }
 

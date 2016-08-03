@@ -31,7 +31,9 @@ namespace DCBot
         public void Start()
         {
             config = new Initializer();
-            _client = new DiscordClient();
+            _client = new DiscordClient(x => { x.LogLevel = LogSeverity.Info; });
+
+            _client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
 
             _client.UsingAudio(x => // Opens an AudioConfigBuilder so we can configure our AudioService
             {
@@ -58,6 +60,7 @@ namespace DCBot
                     Console.ReadLine();
                     Environment.Exit(0);
                 }
+                catch (Exception e) { Console.WriteLine(e); }
                 Console.WriteLine("Connected!");
             });
 
@@ -89,6 +92,7 @@ namespace DCBot
                 .Do(e =>
                 {
                     e.Channel.SendMessage("lmao");
+                    _client.Log.Info("Ayy received", null);
                 });
         }
 
@@ -114,6 +118,7 @@ namespace DCBot
                 }
             }
             catch (FileNotFoundException e) { Console.WriteLine(string.Format("Could not find file; ensure {0} is correct path", path)); }
+            catch (Exception e) { Console.WriteLine(e); }
         }
 
         private void addAudioToQueue(string path, Channel voiceChannel)
@@ -127,7 +132,7 @@ namespace DCBot
             {
                 audioPlaying = true;
                 Command current = audioQueue.Dequeue();
-                try { _vClient = await current.VoiceChannel.JoinAudio(); } catch { }
+                try { _vClient = await current.VoiceChannel.JoinAudio(); } catch (Exception e) { Console.WriteLine(e); }
                 send(current.Path);
             }
             await _vClient.Disconnect();
