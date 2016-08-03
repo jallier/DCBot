@@ -1,6 +1,11 @@
 # DCBot
 A simple Discord bot to play audio snippets from text commands, similar to Airhorn bot.
-To install, download the folder and run DCBot.exe. Ensure that ffmpeg, libsodium.dll and opus.dll are in the same directory. These files are included in folder, or can be found in the res directory (except for ffmpeg which can be found on [its webpage](https://ffmpeg.org/))
+To install, download and unzip the folder. To run double click on the DCBot.exe (windows) or in a terminal `mono DCBot.exe` (linux)
+These files are included in folder, or can be found in the res directory (except for ffmpeg which can be found on [its webpage](https://ffmpeg.org/) or installed via package manager)
+
+**Note on Linux:**
+
+*DCBot should run on Ubuntu 16.04. The download folder includes the necessary libsodium and libopus but there are no guarantees it will work correctly. Also requires the latest version of mono which may be different to one installed via the package manager, and requires ffmpeg to be installed via package manager*
 
 After installing you need to do 2 things before you can run the bot: Register a new bot account and edit the config file
 
