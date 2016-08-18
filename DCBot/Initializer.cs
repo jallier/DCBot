@@ -29,26 +29,14 @@ namespace DCBot
         public void run()
         {
             readConfig();
-            bool convertedWAV = false;
             foreach (var audio in commands)
             {
                 if (!checkForWAV(audio.Path))
                 {
                     convertToWAV(audio.Path);
-                    convertedWAV = true;
                 }
-                else
-                {
-                    audio.Path = Path.ChangeExtension(audio.Path, ".wav");
-                }
-            }
-            if (convertedWAV)
-            {
-                Console.WriteLine("Converted files to appropriate format; please rerun DCBot to start. Press enter to continue");
-                Console.ReadLine();
-                Environment.Exit(0);
-                //Kill the program and ask the user to restart it; This fixes a strange bug where using ffmpeg to convert to
-                //WAV would cause static to play when the command is called.
+                audio.Path = Path.ChangeExtension(audio.Path, ".wav");
+
             }
         }
 
