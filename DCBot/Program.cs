@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.IO;
 using Discord.Commands;
+using System.Reflection;
 
 namespace DCBot
 {
@@ -22,13 +23,13 @@ namespace DCBot
         private bool audioPlaying = false; //This seems like a dirty hack.
         private bool IsRunningOnMono { get; } = (Type.GetType("Mono.Runtime") != null);
 
+        DiscordClient _client = new DiscordClient(x => { x.LogLevel = LogSeverity.Info; });
         /// <summary>
         /// Method to start the bot.
         /// </summary>
         public void Start()
         {
-            Initializer config = new Initializer();
-            DiscordClient _client = new DiscordClient(x => { x.LogLevel = LogSeverity.Info; });
+            Initializer config = new Initializer().run();
             Queue<Command> audioQueue = new Queue<Command>();
 
             _client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
@@ -48,6 +49,8 @@ namespace DCBot
 
             createCommands(config, _client, audioQueue);
 
+            createFileSystemWatcher(config);
+
             _client.ExecuteAndWait(async () =>
             {
                 Console.WriteLine("Connecting to Discord...");
@@ -61,7 +64,39 @@ namespace DCBot
                 catch (Exception e) { Console.WriteLine(e); }
                 Console.WriteLine("Connected!");
             });
+        }
 
+        /// <summary>
+        /// Create a FileSystemWatcher to watch for changes in the config file to trigger a reload of the commands and audio
+        /// </summary>
+        /// <param name="config">Instance of Initializer class</param>
+        /// <returns>FileSystemWatcher for the config file</returns>
+        private FileSystemWatcher createFileSystemWatcher(Initializer config)
+        {
+            FileSystemWatcher fsw = new FileSystemWatcher();
+            fsw.Path = Directory.GetCurrentDirectory();
+            fsw.NotifyFilter = NotifyFilters.LastWrite;
+            fsw.Filter = "config.json";
+            fsw.Changed += new FileSystemEventHandler(OnChange);
+            fsw.EnableRaisingEvents = true;
+            return fsw;
+        }
+
+        /// <summary>
+        /// Called by the FileSystemWatcher when a change in the config file is detected.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="e"></param>
+        public void OnChange(object source, FileSystemEventArgs e)
+        {
+            // Because of how Discord.Net is structured (as far as I understand. I could be wrong) it is impossible to remove commands once added.
+            // Therefore, if a change is detected in the config file, restart the whole application.
+            // Messy, but it works.
+
+            _client.Log.Info(null, "Change in config detected; restarting...");
+            var fileName = Assembly.GetExecutingAssembly().Location;
+            Process.Start(fileName);
+            Environment.Exit(0);
         }
 
         /// <summary>
@@ -78,9 +113,10 @@ namespace DCBot
                {
                    if (e.User.VoiceChannel != null)
                    {
+                       _client.Log.Info(null, command.Path);
                        addAudioToQueue(command.Path, e.User.VoiceChannel, audioQueue);
                        if (!audioPlaying) { sendAudioQueue(audioQueue); }
-                       Console.WriteLine(string.Format("Received command: {1} from: {0}", e.User, command.Command));
+                       Console.WriteLine(string.Format("Received command: {1} from: {0} in {2} on {3}", e.User, command.Command, e.Channel, e.Server));
                    }
 
                });

@@ -23,10 +23,10 @@ namespace DCBot
         public char CommandChar { get; private set; }
         public Initializer()
         {
-            run();
+
         }
 
-        public void run()
+        public Initializer run()
         {
             readConfig();
             foreach (var audio in commands)
@@ -38,6 +38,7 @@ namespace DCBot
                 audio.Path = Path.ChangeExtension(audio.Path, ".wav");
 
             }
+            return this;
         }
 
         /// <summary>
