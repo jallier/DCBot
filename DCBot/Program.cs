@@ -54,15 +54,35 @@ namespace DCBot
             _client.ExecuteAndWait(async () =>
             {
                 Console.WriteLine("Connecting to Discord...");
-                try { await _client.Connect(config.TOKEN); }
-                catch (Discord.Net.HttpException e)
+                int attempts = 0;
+                while (attempts < 3)
                 {
-                    Console.WriteLine("Unable to connect to Discord. Have you registered a new bot? Is your token correct? \nPress enter to exit");
-                    Console.ReadLine();
-                    Environment.Exit(0);
+                    try
+                    {
+                        await _client.Connect(config.TOKEN);
+                        break;
+                    }
+                    catch (Discord.Net.HttpException e)
+                    {
+                        _client.Log.Error("DCBot", string.Format("{0}: {1}", e.GetType().ToString(), e.Message), e);
+                        attempts++;
+                    }
+                    catch (System.Net.WebException e)
+                    {
+                        _client.Log.Error("DCBot", string.Format("{0}: {1}", e.GetType().ToString(), e.Message), e);
+                        attempts++;
+                    }
+                    catch (Exception e) { _client.Log.Error("DCBot", string.Format("{0}: {1}", e.GetType().ToString(), e.Message), e); attempts++; }
                 }
-                catch (Exception e) { Console.WriteLine(e); }
-                Console.WriteLine("Connected!");
+                if (attempts == 0)
+                {
+                    _client.Log.Info("DCBot", "Connected");
+                }
+                else if (attempts == 3) //Failed to connect 3 times; check for errors in config file
+                {
+                    _client.Log.Warning("DCBot", "Failed to connect. Exiting");
+                    Environment.Exit(1);
+                }
             });
         }
 
@@ -113,7 +133,7 @@ namespace DCBot
                {
                    if (e.User.VoiceChannel != null)
                    {
-                       _client.Log.Info(null, command.Path);
+                       _client.Log.Info("DCBot", command.Path);
                        addAudioToQueue(command.Path, e.User.VoiceChannel, audioQueue);
                        if (!audioPlaying) { sendAudioQueue(audioQueue); }
                        Console.WriteLine(string.Format("Received command: {1} from: {0} in {2} on {3}", e.User, command.Command, e.Channel, e.Server));
@@ -125,8 +145,16 @@ namespace DCBot
                 .Description("Test if the bost is receiving messages")
                 .Do(e =>
                 {
-                    e.Channel.SendMessage("lmao");
-                    _client.Log.Info("Ayy received", null);
+                    _client.Log.Info("DCBot", "Ayy received");
+                    try
+                    {
+                        //throw new Discord.Net.TimeoutException();
+                        e.Channel.SendMessage("lmao");
+                    }
+                    catch (Discord.Net.TimeoutException er)
+                    {
+                        _client.Log.Error("DCBot", string.Format("{0}: {1}", er.GetType().ToString(), er.Message), er);
+                    }
                 });
         }
 
@@ -144,14 +172,18 @@ namespace DCBot
                     byte[] buffer = new byte[blockSize];
                     while (f.Read(buffer, 0, buffer.Length) > 0)
                     {
-                        _vClient.Send(buffer, 0, buffer.Length);
+                        try { _vClient.Send(buffer, 0, buffer.Length); }
+                        catch (Discord.Net.TimeoutException e)
+                        {
+                            _client.Log.Error("DCBot", "Error sending audio data: " + e.Message, e);
+                        }
                     }
 
                     _vClient.Wait();
                 }
             }
-            catch (FileNotFoundException e) { Console.WriteLine(string.Format("Could not find file; ensure {0} is correct path", path)); }
-            catch (Exception e) { Console.WriteLine(e); }
+            catch (FileNotFoundException e) { _client.Log.Error("DCBot", string.Format("Could not find file; ensure {0} is correct path", path), e); }
+            catch (Exception e) { _client.Log.Error("DCBot", e); }
         }
 
         private void addAudioToQueue(string path, Channel voiceChannel, Queue<Command> audioQueue)
@@ -164,12 +196,21 @@ namespace DCBot
             IAudioClient _vClient = null;
             while (audioQueue.Count > 0)
             {
-                audioPlaying = true;
                 Command current = audioQueue.Dequeue();
-                try { _vClient = await current.VoiceChannel.JoinAudio(); } catch (Exception e) { Console.WriteLine(e); }
+                try { _vClient = await current.VoiceChannel.JoinAudio(); }
+                catch (Exception e)
+                {
+                    _client.Log.Error("DCBot", "Error joining channel: " + e.Message, e);
+                    break;
+                }
+                audioPlaying = true;
                 send(current.Path, current, _vClient);
             }
-            await _vClient.Disconnect();
+            try { await _vClient.Disconnect(); }
+            catch (Exception e)
+            {
+                _client.Log.Error("DCBot", "Error disconnecting: " + e.Message, e); return;
+            }
             audioPlaying = false;
         }
 
