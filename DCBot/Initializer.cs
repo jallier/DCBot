@@ -47,20 +47,18 @@ namespace DCBot
         /// <param name="path"></param>
         private void convertToWAV(string path)
         {
-            Console.WriteLine(path);
-            string file = Path.GetFileNameWithoutExtension(path);
             var process = Process.Start(new ProcessStartInfo
             {
                 FileName = "ffmpeg",
-                Arguments = string.Format("-i {0} -ar 48000 {1}.wav", path, file),
+                Arguments = string.Format("-i {0} -ar 48000 {1}.wav", path, Path.ChangeExtension(path, null)),
                 UseShellExecute = false
             });
         }
 
         private bool checkForWAV(string path)
         {
-            string file = Path.GetFileNameWithoutExtension(path);
-            if (!File.Exists(file + ".wav"))
+            path = Path.ChangeExtension(path, null);
+            if (!File.Exists(path + ".wav"))
             {
                 return false;
             }
