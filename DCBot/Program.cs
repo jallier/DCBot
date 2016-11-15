@@ -72,7 +72,7 @@ namespace DCBot
                         _client.Log.Error("DCBot", string.Format("{0}: {1}", e.GetType().ToString(), e.Message), e);
                         attempts++;
                     }
-                    catch (Exception e) { _client.Log.Error("DCBot", string.Format("{0}: {1}", e.GetType().ToString(), e.Message), e); attempts++; }
+                    catch (Exception e) { _client.Log.Error("DCBot", string.Format("{0}: {1}\n{2}", e.GetType().ToString(), e.Message, e.InnerException), e); attempts++; }
                 }
                 if (attempts == 0)
                 {
