@@ -22,7 +22,7 @@ namespace DCBot
         public List<Audio> commands { get; } = new List<Audio>();
         public string TOKEN { get; private set; }
         public char CommandChar { get; private set; }
-        private static readonly ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         public Initializer()
         {
             

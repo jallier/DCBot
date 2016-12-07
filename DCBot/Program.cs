@@ -23,7 +23,7 @@ namespace DCBot
 
         private bool audioPlaying = false; //This seems like a dirty hack.
         private bool IsRunningOnMono { get; } = (Type.GetType("Mono.Runtime") != null);
-        private static readonly ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType); // Initialize logger with class name of calling class
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType); // Initialize logger with class name of calling class
 
         DiscordClient _client = new DiscordClient(x => { x.LogLevel = LogSeverity.Info; });
         /// <summary>
@@ -34,6 +34,12 @@ namespace DCBot
             log.Info("Application is starting");
             Initializer config = new Initializer().run();
             Queue<Command> audioQueue = new Queue<Command>();
+            _client.Log.Message += (s, e) => // Log Discord.Net messages to log4net 
+            {
+                if (e.Severity == LogSeverity.Info) { log.Info(e.Message); }
+                else if (e.Severity == LogSeverity.Warning) { log.Warn(e.Message); }
+                else if (e.Severity == LogSeverity.Error) { log.Error(e.Message); }
+            };
 
             _client.UsingAudio(x => // Opens an AudioConfigBuilder so we can configure our AudioService
             {
@@ -75,26 +81,13 @@ namespace DCBot
                     }
                     catch (Exception e) { log.Error(string.Format("{0}: {1}", e.GetType().ToString(), e.Message)); attempts++; }
                 }
-                if (attempts == 0)
-                {
-                    log.Info("Connected");
-                }
-                else if (attempts == 3) //Failed to connect 3 times; check for errors in config file
+
+                if (attempts == 3) //Failed to connect 3 times; check for errors in config file
                 {
                     log.Warn("Failed to connect. Exiting");
                     Environment.Exit(1);
                 }
             });
-        }
-
-        private static void closeLog(StreamWriter logfile)
-        {
-            logfile.Close();
-        }
-
-        private void logToFile(string message, StreamWriter logfile)
-        {
-
         }
 
         /// <summary>
