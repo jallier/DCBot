@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Diagnostics;
+using log4net;
 
 namespace DCBot
 {
@@ -21,9 +22,10 @@ namespace DCBot
         public List<Audio> commands { get; } = new List<Audio>();
         public string TOKEN { get; private set; }
         public char CommandChar { get; private set; }
+        private static readonly ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         public Initializer()
         {
-
+            
         }
 
         public Initializer run()
@@ -47,6 +49,7 @@ namespace DCBot
         /// <param name="path"></param>
         private void convertToWAV(string path)
         {
+            log.Info("Starting ffmpeg process to convert audio file");
             var process = Process.Start(new ProcessStartInfo
             {
                 FileName = "ffmpeg",
@@ -97,8 +100,8 @@ namespace DCBot
         private void generateAddURL(string client_id)
         {
             string base_string = "https://discordapp.com/oauth2/authorize?scope=bot&permissions=0&client_id=";
-            Console.WriteLine("If you haven't done so, visit this URL to add the bot to your server");
-            Console.WriteLine(base_string + client_id);
+            log.Info("If you haven't done so, visit this URL to add the bot to your server");
+            log.Info(base_string + client_id);
         }
     }
 }
