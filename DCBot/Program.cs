@@ -17,11 +17,20 @@ namespace DCBot
     {
         static void Main(string[] args)
         {
+            Console.CancelKeyPress += delegate
+            {
+                // Put log file closing code here
+                //closeLog(logfile);
+                logfile.Close();
+                Console.WriteLine("Closed log");
+                Console.Read();
+            };
             new Program().Start();
         }
 
         private bool audioPlaying = false; //This seems like a dirty hack.
         private bool IsRunningOnMono { get; } = (Type.GetType("Mono.Runtime") != null);
+        private static StreamWriter logfile;
 
         DiscordClient _client = new DiscordClient(x => { x.LogLevel = LogSeverity.Info; });
         /// <summary>
@@ -31,8 +40,10 @@ namespace DCBot
         {
             Initializer config = new Initializer().run();
             Queue<Command> audioQueue = new Queue<Command>();
+            logfile = new StreamWriter("dcbot_log.txt", true);
 
             _client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
+            _client.Log.Message += (s, e) => logfile.WriteLine($"{DateTime.Now.ToString()} - [{e.Severity}] {e.Source}: {e.Message}");
 
             _client.UsingAudio(x => // Opens an AudioConfigBuilder so we can configure our AudioService
             {
@@ -84,6 +95,16 @@ namespace DCBot
                     Environment.Exit(1);
                 }
             });
+        }
+
+        private static void closeLog(StreamWriter logfile)
+        {
+            logfile.Close();
+        }
+
+        private void logToFile(string message, StreamWriter logfile)
+        {
+
         }
 
         /// <summary>
