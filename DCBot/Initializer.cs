@@ -25,7 +25,7 @@ namespace DCBot
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         public Initializer()
         {
-            
+
         }
 
         public Initializer run()
@@ -33,11 +33,15 @@ namespace DCBot
             readConfig();
             foreach (var audio in commands)
             {
-                if (!checkForWAV(audio.Path))
+                for (int i = 0; i < audio.Paths.Length; i++)
                 {
-                    convertToWAV(audio.Path);
+                    string path = audio.Paths[i];
+                    if (!checkForWAV(path))
+                    {
+                        convertToWAV(path);
+                    }
+                    audio.Paths[i] = Path.ChangeExtension(path, ".wav");
                 }
-                audio.Path = Path.ChangeExtension(audio.Path, ".wav");
 
             }
             return this;
@@ -81,8 +85,23 @@ namespace DCBot
             CommandChar = (char)json["command_char"];
             foreach (var command in json["commands"])
             {
-                Audio audio = new Audio((string)command["command"], (string)command["path"]);
-                if (!File.Exists(audio.Path)) { continue; }
+                string[] paths;
+                try
+                {
+                    paths = new string[] { (string)command["path"] };
+                    log.Debug(paths);
+                }
+                catch (System.ArgumentException e) // Is an array; multiple paths
+                {
+                    //log.Debug(command["path"].GetType());
+                    paths = command["path"].ToObject<string[]>();
+                    log.Debug(paths);
+                }
+                Audio audio = new Audio((string)command["command"], paths);
+                foreach (var path in audio.Paths)
+                {
+                    if (!File.Exists(path)) { continue; }
+                }
                 if (command["alias"] != null)
                 {
                     List<string> output = new List<string>();

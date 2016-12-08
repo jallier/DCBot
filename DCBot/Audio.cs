@@ -15,12 +15,12 @@ namespace DCBot
         /// Command user will type to play soundbite
         /// </summary>
         public string Command { get; }
-        public string Path { get; set; }
+        public string[] Paths { get; set; }
         public string[] Alias { get; set; }
         public string Description { get; set; }
-        public Audio(string command, string path, string[] alias = null, string description = null)
+        public Audio(string command, string[] path, string[] alias = null, string description = null)
         {
-            Path = path;
+            Paths = path;
             Command = command;
             Alias = alias;
             Description = description;
@@ -28,7 +28,7 @@ namespace DCBot
 
         public override string ToString()
         {
-            return string.Format("{0} ([{1}]): {2}: {3}", Command, Alias, Description, Path);
+            return string.Format("{0} ([{1}]): {2}: {3}", Command, Alias, Description, Paths);
         }
     }
 }

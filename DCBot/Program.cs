@@ -137,8 +137,17 @@ namespace DCBot
                {
                    if (e.User.VoiceChannel != null)
                    {
-                       log.Info(command.Path);
-                       addAudioToQueue(command.Path, e.User.VoiceChannel, audioQueue);
+                       log.Info(command.Paths);
+                       if (command.Paths.Length == 1)
+                       {
+                           addAudioToQueue(command.Paths[0], e.User.VoiceChannel, audioQueue);
+                       }
+                       else
+                       {
+                           Random r = new Random();
+                           int randomNum = r.Next(command.Paths.Length);
+                           addAudioToQueue(command.Paths[randomNum], e.User.VoiceChannel, audioQueue);
+                       }
                        if (!audioPlaying) { sendAudioQueue(audioQueue); }
                        log.Info(string.Format("Received command: {1} from: {0} in {2} on {3}", e.User, command.Command, e.Channel, e.Server));
                    }
@@ -146,13 +155,12 @@ namespace DCBot
                });
             }
             _client.GetService<CommandService>().CreateCommand("ayy")
-                .Description("Test if the bost is receiving messages")
+                .Description("Test if the bot is receiving messages")
                 .Do(e =>
                 {
                     log.Info(string.Format("Ayy received from: {0} in {1} on {2}", e.User, e.Channel, e.Server));
                     try
                     {
-                        //throw new Discord.Net.TimeoutException();
                         e.Channel.SendMessage("lmao");
                         log.Info("Sent lmao");
                     }
@@ -185,6 +193,7 @@ namespace DCBot
                     }
 
                     _vClient.Wait();
+                    log.Info("Sent audio: " + path);
                 }
             }
             catch (FileNotFoundException e) { log.Error(string.Format("Could not find file; ensure {0} is correct path", path)); }
