@@ -57,7 +57,7 @@ namespace DCBot
             var process = Process.Start(new ProcessStartInfo
             {
                 FileName = "ffmpeg",
-                Arguments = string.Format("-i {0} -ar 48000 {1}.wav", path, Path.ChangeExtension(path, null)),
+                Arguments = string.Format("-i {0} -ar 48000 -ac 2 {1}.wav", path, Path.ChangeExtension(path, null)),
                 UseShellExecute = false
             });
         }
