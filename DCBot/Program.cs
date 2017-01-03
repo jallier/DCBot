@@ -133,6 +133,7 @@ namespace DCBot
                 CommandBuilder cb = _client.GetService<CommandService>().CreateCommand(command.Command);
                 if (command.Alias != null) { cb.Alias(command.Alias); }
                 if (command.Description != null) { cb.Description(command.Description); }
+                cb.Parameter("AudioIndex", ParameterType.Optional);
                 cb.Do(e =>
                {
                    if (e.User.VoiceChannel != null)
@@ -142,11 +143,20 @@ namespace DCBot
                        {
                            addAudioToQueue(command.Paths[0], e.User.VoiceChannel, audioQueue);
                        }
-                       else
+                       else //Multiple options for audio
                        {
-                           Random r = new Random();
-                           int randomNum = r.Next(command.Paths.Length);
-                           addAudioToQueue(command.Paths[randomNum], e.User.VoiceChannel, audioQueue);
+                           int parseValue, index;
+                           int.TryParse(e.GetArg("AudioIndex"), out parseValue);
+                           if (parseValue != 0 && parseValue <= command.Paths.Length)
+                           {
+                               index = parseValue;
+                           }
+                           else
+                           {
+                               Random r = new Random();
+                               index = r.Next(command.Paths.Length);
+                           }
+                           addAudioToQueue(command.Paths[index-1], e.User.VoiceChannel, audioQueue);
                        }
                        if (!audioPlaying) { sendAudioQueue(audioQueue); }
                        log.Info(string.Format("Received command: {1} from: {0} in {2} on {3}", e.User, command.Command, e.Channel, e.Server));
